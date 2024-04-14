@@ -132,6 +132,14 @@ class Sudoku:
                     pygame.quit()
                     sys.exit()
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = pygame.mouse.get_pos()
+                    row, col = y // CELL_SIZE, x // CELL_SIZE
+                    if 0 <= row < 9 and 0 <= col < 9 and self.board[row][col] == 0:
+                        selected = (row, col)
+                    else:
+                        selected = None
+
                 if event.type == pygame.KEYDOWN:
                     if selected:
                         if event.unicode.isdigit() and self.is_valid(self.board, int(event.unicode), selected):
@@ -147,18 +155,20 @@ class Sudoku:
                             self.board[selected[0]][selected[1]] = 0
                             selected = None
 
-                    if event.key == pygame.K_SPACE:
-                        x, y = pygame.mouse.get_pos()
-                        row, col = y // CELL_SIZE, x // CELL_SIZE
-                        if self.board[row][col] == 0:
-                            selected = (row, col)
-
             self.draw_board(screen)
 
             if selected:
                 self.draw_selected_cell(screen, *selected)
 
+            if self.board == self.solved_board:
+                self.draw_success(screen)
+
             pygame.display.update()
+
+    def draw_success(self, screen):
+        text_surface = FONT.render("Congratulations! Sudoku Solved!", True, BLACK)
+        text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - 50))
+        screen.blit(text_surface, text_rect)
 
 if __name__ == "__main__":
     level = input("Choose a level (simple, medium, complex): ").lower()
