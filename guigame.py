@@ -11,6 +11,7 @@ BLACK = (0, 0, 0)
 GRAY = (200, 200, 200)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 # Screen dimensions
 WIDTH, HEIGHT = 540, 600
@@ -112,7 +113,11 @@ class Sudoku:
         for i in range(9):
             for j in range(9):
                 if self.board[i][j] != 0:
-                    text_surface = FONT.render(str(self.board[i][j]), True, BLACK)
+                    if self.board[i][j] == self.solved_board[i][j]:
+                        text_color = BLACK
+                    else:
+                        text_color = GREEN
+                    text_surface = FONT.render(str(self.board[i][j]), True, text_color)
                     text_rect = text_surface.get_rect(center=(j * CELL_SIZE + CELL_SIZE // 2, i * CELL_SIZE + CELL_SIZE // 2))
                     screen.blit(text_surface, text_rect)
 
@@ -159,12 +164,14 @@ class Sudoku:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     row, col = y // CELL_SIZE, x // CELL_SIZE
-                    if 0 <= row < 9 and 0 <= col < 9:
+                    if 0 <= row < 9 and 0 <= col < 9 and self.board[row][col] == 0:
                         selected = (row, col)
+                    else:
+                        selected = None
 
                 if event.type == pygame.KEYDOWN:
                     if selected:
-                        if event.key == pygame.K_BACKSPACE:
+                        if event.key == pygame.K_BACKSPACE and self.board[selected[0]][selected[1]] == 0:
                             self.board[selected[0]][selected[1]] = 0
                             selected = None
                         elif event.unicode.isdigit() and self.is_valid(self.board, int(event.unicode), selected):
