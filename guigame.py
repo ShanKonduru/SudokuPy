@@ -118,6 +118,19 @@ class Sudoku:
         cell = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         pygame.draw.rect(screen, RED, cell, 3)
 
+    def draw_success(self, screen):
+        text_surface = FONT.render("Congratulations! You solved the Sudoku!", True, BLACK)
+        text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - 50))
+        screen.blit(text_surface, text_rect)
+
+    def get_hint(self):
+        empty_cells = [(i, j) for i in range(9) for j in range(9) if self.board[i][j] == 0]
+        if not empty_cells:
+            return None
+
+        row, col = random.choice(empty_cells)
+        return self.solved_board[row][col]
+
     def play(self):
         screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Sudoku')
@@ -154,6 +167,10 @@ class Sudoku:
                         elif event.key == pygame.K_BACKSPACE:
                             self.board[selected[0]][selected[1]] = 0
                             selected = None
+                        elif event.key == pygame.K_h:
+                            hint = self.get_hint()
+                            if hint:
+                                self.board[selected[0]][selected[1]] = hint
 
             self.draw_board(screen)
 
@@ -164,11 +181,6 @@ class Sudoku:
                 self.draw_success(screen)
 
             pygame.display.update()
-
-    def draw_success(self, screen):
-        text_surface = FONT.render("Congratulations! Sudoku Solved!", True, BLACK)
-        text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - 50))
-        screen.blit(text_surface, text_rect)
 
 if __name__ == "__main__":
     level = input("Choose a level (simple, medium, complex): ").lower()
