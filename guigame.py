@@ -125,7 +125,7 @@ class Sudoku:
         pygame.draw.rect(screen, RED, cell, 3)
 
     def draw_success(self, screen):
-        text_surface = FONT.render("Congratulations! Sudoku solved!", True, BLACK)
+        text_surface = FONT.render("Congratulations! You solved the Sudoku!", True, BLACK)
         text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - 50))
         screen.blit(text_surface, text_rect)
 
@@ -144,7 +144,7 @@ class Sudoku:
 
     def play(self):
         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption('SHAN - Sudoku')
+        pygame.display.set_caption('Sudoku')
 
         selected = None
         running = True
@@ -159,10 +159,8 @@ class Sudoku:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     row, col = y // CELL_SIZE, x // CELL_SIZE
-                    if 0 <= row < 9 and 0 <= col < 9 and self.board[row][col] == 0:
+                    if 0 <= row < 9 and 0 <= col < 9:
                         selected = (row, col)
-                    else:
-                        selected = None
 
                 if event.type == pygame.KEYDOWN:
                     if selected:
@@ -172,12 +170,6 @@ class Sudoku:
                         elif event.unicode.isdigit() and self.is_valid(self.board, int(event.unicode), selected):
                             self.board[selected[0]][selected[1]] = int(event.unicode)
                             selected = None
-                        elif event.key == pygame.K_RETURN:
-                            row, col = selected
-                            if self.board[row][col] == self.solved_board[row][col]:
-                                self.draw_selected_cell(screen, row, col)
-                            else:
-                                self.draw_error(screen, row, col)
                         elif event.key == pygame.K_h:
                             hint = self.get_hint()
                             if hint:
