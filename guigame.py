@@ -100,11 +100,17 @@ class Sudoku:
         return solved_board
 
     def draw_board(self, screen):
+        for i in range(10):
+            if i % 3 == 0:
+                thickness = 3
+            else:
+                thickness = 1
+
+            pygame.draw.line(screen, BLACK, (0, i * CELL_SIZE), (WIDTH, i * CELL_SIZE), thickness)
+            pygame.draw.line(screen, BLACK, (i * CELL_SIZE, 0), (i * CELL_SIZE, HEIGHT), thickness)
+
         for i in range(9):
             for j in range(9):
-                cell = pygame.Rect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                pygame.draw.rect(screen, BLACK, cell, 1)
-
                 if self.board[i][j] != 0:
                     text_surface = FONT.render(str(self.board[i][j]), True, BLACK)
                     text_rect = text_surface.get_rect(center=(j * CELL_SIZE + CELL_SIZE // 2, i * CELL_SIZE + CELL_SIZE // 2))
@@ -119,7 +125,7 @@ class Sudoku:
         pygame.draw.rect(screen, RED, cell, 3)
 
     def draw_success(self, screen):
-        text_surface = FONT.render("Congratulations! You solved the Sudoku!", True, BLACK)
+        text_surface = FONT.render("Congratulations! Sudoku solved!", True, BLACK)
         text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - 50))
         screen.blit(text_surface, text_rect)
 
@@ -128,12 +134,17 @@ class Sudoku:
         if not empty_cells:
             return None
 
-        row, col = random.choice(empty_cells)
-        return self.solved_board[row][col]
+        for row, col in empty_cells:
+            possible_values = [i for i in range(1, 10) if self.is_valid(self.board, i, (row, col)) and i != self.solved_board[row][col]]
+
+            if possible_values:
+                return row, col, possible_values[0]
+
+        return None
 
     def play(self):
         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption('Sudoku')
+        pygame.display.set_caption('SHAN - Sudoku')
 
         selected = None
         running = True
@@ -155,7 +166,10 @@ class Sudoku:
 
                 if event.type == pygame.KEYDOWN:
                     if selected:
-                        if event.unicode.isdigit() and self.is_valid(self.board, int(event.unicode), selected):
+                        if event.key == pygame.K_BACKSPACE:
+                            self.board[selected[0]][selected[1]] = 0
+                            selected = None
+                        elif event.unicode.isdigit() and self.is_valid(self.board, int(event.unicode), selected):
                             self.board[selected[0]][selected[1]] = int(event.unicode)
                             selected = None
                         elif event.key == pygame.K_RETURN:
@@ -164,13 +178,11 @@ class Sudoku:
                                 self.draw_selected_cell(screen, row, col)
                             else:
                                 self.draw_error(screen, row, col)
-                        elif event.key == pygame.K_BACKSPACE:
-                            self.board[selected[0]][selected[1]] = 0
-                            selected = None
                         elif event.key == pygame.K_h:
                             hint = self.get_hint()
                             if hint:
-                                self.board[selected[0]][selected[1]] = hint
+                                row, col, hint_value = hint
+                                self.board[row][col] = hint_value
 
             self.draw_board(screen)
 
